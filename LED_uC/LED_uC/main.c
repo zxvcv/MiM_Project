@@ -15,8 +15,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/power.h>
+#include "buff.h"
 
-#define LEDNO   15 //Liczba LEDow
+#define LEDNO_MAX   15 //Liczba LEDow na taœmie
+#define LEDNO_USE   10 //Liczba LEDow u¿ywanych
 
 
 
@@ -38,10 +40,10 @@ void WS2812B_UDR(uint8_t byte)
 void WS2812B_reset(int length)
 {
 	for(int i=0; i<length; ++i)
-	WS2812B_UDR(0x00);
+		WS2812B_UDR(0x00);
 }
 
-void WS2812B_send(uint8_t byte)
+void WS2812B_send_byte(uint8_t byte)
 {
 	uint8_t tmp=0x00;
 	if(byte & 0x80) tmp=0b11100000; else tmp=0b10000000;
@@ -59,7 +61,13 @@ void WS2812B_send(uint8_t byte)
 	if(byte & 0x02) tmp=0b11100000; else tmp=0b10000000;
 	if(byte & 0x01) tmp|=0b00001110; else tmp|=0b00001000;
 	WS2812B_UDR(tmp);  //Wyœlij bity 1-0
-	
+}
+
+void WS2812B_send_iLED(uint8_t R, uint8_t G, uint8_t B)
+{
+	WS2812B_send_byte(G);
+	WS2812B_send_byte(R);
+	WS2812B_send_byte(B);
 }
 
 //jeden transfer do 15 ledów to 180 wysylan pelnych buforów z UART
@@ -72,143 +80,104 @@ int main(void)
 	uint8_t colorR=255;
 	uint8_t colorB=255;
 
+	WS2812B_reset(20);
+
+	for(int i=0; i<LEDNO_MAX; ++i)
+	{
+		WS2812B_send_byte(0);
+		WS2812B_send_byte(0);
+		WS2812B_send_byte(0);
+	}
+	
 	while(1)
 	{
-		for(int j=0; j<LEDNO-1; ++j)
+		for(int j=0; j<LEDNO_USE-1; ++j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(0);
-					WS2812B_send(colorR);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, colorR, 0);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 		
-		for(int j=LEDNO-1; j>=1; --j)
+		for(int j=LEDNO_USE-1; j>=1; --j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(0);
-					WS2812B_send(colorR);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, colorR, 0);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 		
-		for(int j=0; j<LEDNO-1; ++j)
+		for(int j=0; j<LEDNO_USE-1; ++j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(colorG);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(colorG, 0, 0);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 		
-		for(int j=LEDNO-1; j>=1; --j)
+		for(int j=LEDNO_USE-1; j>=1; --j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(colorG);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(colorG, 0, 0);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 		
-		for(int j=0; j<LEDNO-1; ++j)
+		for(int j=0; j<LEDNO_USE-1; ++j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(colorB);
-				}
+					WS2812B_send_iLED(0, 0, colorB);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 		
-		for(int j=LEDNO-1; j>=1; --j)
+		for(int j=LEDNO_USE-1; j>=1; --j)
 		{
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
 			WS2812B_reset(180*100);
-			for(int i=0; i<LEDNO; ++i)
+			for(int i=0; i<LEDNO_USE; ++i)
 			{
 				if(i==j)
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(colorB);
-				}
+					WS2812B_send_iLED(0, 0, colorB);
 				else
-				{
-					WS2812B_send(0);
-					WS2812B_send(0);
-					WS2812B_send(0);
-				}
+					WS2812B_send_iLED(0, 0, 0);
 			}
 		}
 	}
