@@ -21,7 +21,10 @@ RetVal get(Buffer *buff)
 {
 	RetVal ret;
 	if (buff->tail == NULL)
+	{
+		ret.byte = 0x00;
 		ret.retStatus = true;
+	}
 	else
 	{
 		ret.retStatus = false;
