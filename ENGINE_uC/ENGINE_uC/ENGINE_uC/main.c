@@ -6,114 +6,133 @@
  */ 
 
 #include <avr/io.h>
-#include <util/delay.h>
-#include <stdlib.h>
-//#include <avr/interrupt.h>
-//#include <avr/power.h>
-#include "control_hd44780.h"
-
-void timer_init()
-{
-	TCCR1A|=(1<<COM1A1); //stan 1 od 0 do zdarzenia CompareMatch
-	OCR1AH=0x00;
-	OCR1AL=128;
-	TCCR1A|=(1<<WGM10);
-	TCCR1B|=(1<<WGM12); //tryb fast PWM 8-bit
-	TCCR1B|=(1<<CS10); //preskaler 1
-	DDRB|=(1<<PB1); //pin OC1A (PB1) jest wyjsciem
-}
-
-void engine_init()
-{
-	DDRC|=((1<<PC4)|(1<<PC5)); //PC4, PC5 wyjscia
-	PORTC&=(0<<PC4);
-	PORTC|=(1<<PC5); //wybor kierunku obrotow silnika
-	timer_init();
-}
+#include <avr/interrupt.h>
+#include <stdbool.h>
+#include "lib/lcd_interface.h"
+#include "lib/inits.h"
 
 
-//funkcja zwarca podana liczbe jako lancuch, trzeba zwolnic pamiec gdy lancuch nie jest juz potrzebny
-char* uint_to_char(uint8_t val) //dodac warunek gdy nie uda sie zaalokowac pamieci
-{
-	char * ret_val = NULL;
-	if(val == 0)
-	{
-		ret_val = malloc(sizeof(char)*2);
-		ret_val[0]='0';
-		ret_val[1]='\0';
-		return ret_val;
-	}
-	uint8_t val2 = val;
-	uint8_t counter = 0;
-	while (val2 > 0) { val2 = val2 / 10; counter++; } //zlicza ilosc cyfr w liczbie
-	ret_val = malloc(sizeof(char)*(counter+1));
-	
-	for(int i=counter-1; i>=0; --i)
-	{
-		ret_val[i] = (val%10)+48;
-		val = val/10;
-	}
-	ret_val[counter]='\0';
-	return ret_val;
-}
+volatile uint8_t speed = 0;		//predkoœæ obrotu glowicy odczytana przez czujnik
+volatile uint8_t oldspeed = 0;	//poprzednia predkoœæ obrotu g³owicy odczytana przez czujnik
 
-void free_char(char *val)
-{
-	free(val);
-	val = NULL;
-}
+volatile uint8_t keyCount[2];	//liczniki opóŸnienia dragania styków 
+volatile uint8_t keyBuffer[2];	//bufory wartoœci pinów przycików
+volatile bool keyFlag[2];		//aktualne flagi przycisków
+volatile bool oldkeyFlag[2];	//stare flagi przycisków
+
+volatile uint8_t count_tim=0;	//ilosæ obrotów lizona w aktualnej sekundzie
+
+
 
 int main(void)
 {
-	//clock_prescale_set(clock_div_1);
-	DDRD&=((0<<PD2)|(0<<PD3)); //PD2, PD3 wejœcia
-	PORTD|=((1<<PD2)|(1<<PD3)); //PD2, PD3 podciagniecie do Vcc
+	uint8_t rejestrOC1A = 2;	//pocz¹tkowe wartoœci wype³nienia PWM
+	uint8_t rejestrOC1Anew = 1;	//
+	bool pin;					//zmienne do rpzechowywania watosci PINU podczas odczytu watroœci z czujnika
+	bool oldpin=1;				//
 	
-	uint8_t rejestrOC1A = 255;
-	uint8_t rejestrOC1Anew = 255;
-	char *string = NULL;
+	init_ports();
 	lcd_init();
-    engine_init();
+	init_engine();
+	init_timer0(); //do przyciskow
+	init_timer1(); //do silnika PWM
+	init_timer2(); //RTC
+	sei();
 	
-	
-	lcd_cls();
-	lcd_goto(0, 0);
-	lcd_puttext("Wartosc OC1A:");
-	lcd_goto(0, 1);
-	string = uint_to_char(rejestrOC1Anew);
-	lcd_puttext(string);
-	free(string);
-	while (1) 
-    {
-		if(rejestrOC1A != rejestrOC1Anew)
+	while (1)
+	{
+		//aktualizacja danych na wyœwietlaczu
+		if(rejestrOC1A != rejestrOC1Anew || oldspeed != speed)// 
 		{
-			lcd_cls();
-			lcd_goto(0, 0);
-			lcd_puttext("Wartosc OC1A:");
-			lcd_goto(0, 1);
-			string = uint_to_char(rejestrOC1Anew);
-			lcd_puttext(string);
-			free(string);
+			send_clear();
+			send_text("OC1A:", 1, 1);
+			send_uint8(rejestrOC1Anew, 1, 8);
+			send_text("speed:", 2, 1);
+			send_uint8(speed, 2, 8);
+			send_text("Hz", 2, 12);
+			
+			oldspeed = speed;
 			rejestrOC1A = rejestrOC1Anew;
 		}
 		
-		if(!(PIND & (1<<PD2)))
+		
+		//przycisk1
+		if(oldkeyFlag[0] == 1 && keyFlag[0] == 0)
 		{
 			rejestrOC1Anew++;
 			OCR1AL = rejestrOC1Anew;
-			_delay_ms(80);
-			while(!(PIND & (1<<PD2))) {}
-			_delay_ms(80);
 		}
+		oldkeyFlag[0]=keyFlag[0];
 		
-		if(!(PIND & (1<<PD3)))
+		
+		//przycisk2
+		if(oldkeyFlag[1] == 1 && keyFlag[1] == 0)
 		{
 			rejestrOC1Anew--;
 			OCR1AL = rejestrOC1Anew;
-			_delay_ms(80);
-			while(!(PIND & (1<<PD3))) {}
-			_delay_ms(80);
 		}
-    }
+		oldkeyFlag[1]=keyFlag[1];
+
+
+		//czujnik
+		pin = PIND&(1<<PD2);
+		if(!pin && oldpin == true && pin == false )
+		{
+			oldpin = pin;
+			++count_tim;
+		}
+		else if(oldpin == false && pin == true)
+			oldpin = pin;
+	}
 }
 
+
+
+//------interrupts-----
+
+ISR(TIMER0_OVF_vect)
+{
+	uint8_t pin = PIND;
+	
+	//przycisk1
+	if(keyCount == 0) //jesli nie liczy
+	{
+		keyCount[0] = 10; //zacznij liczenie
+		keyBuffer[0] = pin & (1<<PD6); //zapis stanu pinu
+	}
+	else
+	{
+		--keyCount[0];
+		if( keyBuffer[0] != (pin & (1<<PD6)) ) //jesli stan pinu sie zmienil
+		{
+			keyCount[0] = 10; //licz od poczatku
+			keyBuffer[0] = pin & (1<<PD6); //aktualizacja wartosci
+		}
+		else if(keyCount[0] == 0) //liczenie zakonczone
+		keyFlag[0] = pin&(1<<PD6);
+	}
+	
+	//przycisk2
+	if(keyCount == 0) //jesli nie liczy
+	{
+		keyCount[1] = 10; //zacznij liczenie
+		keyBuffer[1] = pin & (1<<PD7); //zapis stanu pinu
+	}
+	else
+	{
+		--keyCount[1];
+		if( keyBuffer[1] != (pin & (1<<PD7)) ) //jesli stan pinu sie zmienil
+		{
+			keyCount[1] = 10; //licz od poczatku
+			keyBuffer[1] = pin & (1<<PD7); //aktualizacja wartosci
+		}
+		else if(keyCount[1] == 0) //liczenie zakonczone
+		keyFlag[1] = pin&(1<<PD7);
+	}
+}
+
+ISR(TIMER2_OVF_vect)
+{
+	speed = count_tim;
+	count_tim =0;
+}

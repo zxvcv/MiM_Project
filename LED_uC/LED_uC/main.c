@@ -21,12 +21,12 @@
 #include "prog1.h" //tablica danych do wyswietlenia
 
 extern uint8_t COLORS[256][3];
-extern uint8_t TIMES[5];
-extern uint8_t DATA[5][10][10];
+extern uint8_t TIMES[1];
+extern uint8_t DATA[1][60][10];
 
 #define COLORS_NUM 256
-#define PICTURES_NUM 5
-#define LINE_NUM 10
+#define PICTURES_NUM 1
+#define LINE_NUM 60
 
 #define LEDNO_MAX 15 //Liczba LEDow na taœmie
 #define LEDNO_USE 10 //Liczba LEDow u¿ywanych
@@ -101,14 +101,14 @@ int main(void)
 		{
 			for(int m=0; m<TIMES[i]; ++m) //d³ugoœæ wyswietlania jednej martycy danych (w [s])
 			{
-				for(int n=0; n<60; ++n) //odœwierzanie 60Hz
+				for(int n=0; n<10; ++n) //odœwierzanie 60Hz (zmienione)
 				{
-					for(int j=0; j<LINE_NUM; ++j) //ustawienie wszystkich LEDów w linii
+					for(int j=0; j<LINE_NUM; ++j) //ustawienie wszystkich LEDów matrycy
 					{
-						WS2812B_reset(20);
-						for(int k=0; k<LEDNO_USE; ++k) //ustawianie pojednyczego LEDa
+						WS2812B_reset(20); //reset
+						for(int k=0; k<LEDNO_USE; ++k) //ustawienie wszystkich LEDów w linii
 						{
-							WS2812B_send_iLED(COLORS[DATA[i][j][k]][0], COLORS[DATA[i][j][k]][1], COLORS[DATA[i][j][k]][2]);
+							WS2812B_send_iLED(COLORS[DATA[i][j][k]][0], COLORS[DATA[i][j][k]][1], COLORS[DATA[i][j][k]][2]); //ustawianie pojednyczego LEDa
 						}
 					}
 				}
