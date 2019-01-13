@@ -9,7 +9,10 @@
 #ifndef COLORS_H_
 #define COLORS_H_
 
-uint8_t COLORS[256][3] = {
+#include <avr/pgmspace.h>
+
+
+const uint8_t __flash COLORS[256][3] = {
 							//  R    G    B
 							{   0,   0,   0 }, //  0	Black	(system)
 							{ 128,   0,   0 }, //  1	Maroon	(system)

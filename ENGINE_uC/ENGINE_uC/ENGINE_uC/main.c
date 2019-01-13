@@ -26,8 +26,8 @@ volatile uint8_t count_tim=0;	//ilosæ obrotów lizona w aktualnej sekundzie
 
 int main(void)
 {
-	uint8_t rejestrOC1A = 2;	//pocz¹tkowe wartoœci wype³nienia PWM
-	uint8_t rejestrOC1Anew = 1;	//
+	uint8_t rejestrOC1A = 144;	//pocz¹tkowe wartoœci wype³nienia PWM
+	uint8_t rejestrOC1Anew = 145;	//
 	bool pin;					//zmienne do rpzechowywania watosci PINU podczas odczytu watroœci z czujnika
 	bool oldpin=1;				//
 	
