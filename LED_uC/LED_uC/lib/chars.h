@@ -9,7 +9,7 @@
 #ifndef CHARS_H_
 #define CHARS_H_
 
-#include "define.h"
+#include "../define.h"
 #include <stdbool.h>
 #include <avr/pgmspace.h>
 

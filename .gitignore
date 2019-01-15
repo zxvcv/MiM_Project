@@ -23,9 +23,9 @@
 
 #User Specific Files
 *.atsuo
-*.cproj
+.cproj
 *.xml
-*.atsln
+.atsln
 
 
 # End of https://www.gitignore.io/api/atmelstudio

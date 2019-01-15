@@ -9,6 +9,7 @@
 #ifndef DATA_SEND_H_
 #define DATA_SEND_H_
 
+#include "../define.h"
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 

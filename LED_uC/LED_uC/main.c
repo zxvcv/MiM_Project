@@ -15,7 +15,7 @@
 #include <avr/io.h>
 #include <avr/power.h>
 #include <stdbool.h>
-#include "data_send.h"
+#include "lib/data_send.h"
 
 
 int main(void)
@@ -32,9 +32,9 @@ int main(void)
 	uint8_t bg = 0;
 
 	//const uint8_t cl1[] = { 202,202,202,202,202,202,202,202,202,202,202,202,202,202,202,202 };
-	const uint8_t cl2[] = { 160,160,160,160,160,160,160,160,160,160,160,160,160,160,160,160 };
-	const uint8_t cl3[] = { 226,226,226,226,226,226,226,226,226,226,226,226,226,226,226,226 };
-	const uint8_t cl4[] = { 154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154 };
+	//const uint8_t cl2[] = { 160,160,160,160,160,160,160,160,160,160,160,160,160,160,160,160 };
+	//const uint8_t cl3[] = { 226,226,226,226,226,226,226,226,226,226,226,226,226,226,226,226 };
+	//const uint8_t cl4[] = { 154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154 };
 	const uint8_t cl5[] = { 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22 };
 	const uint8_t cl6[] = { 26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26 };
 		
@@ -51,9 +51,9 @@ int main(void)
 		if(PINC&(1<<PC1)) //PC1 nie zwarty do masy
 		{
 			show_text_SC("AVR ATMEGA328P  ", 202, size, length, bg);
-			show_text_MC("MIKROKONTROLERY ", cl2, size, length, bg);
-			show_text_MC("I MIKROPROCESORY", cl3, size, length, bg);
-			show_text_MC("PROJEKT:        ", cl4, size, length, bg);
+			show_text_SC("MIKROKONTROLERY ", 160, size, length, bg);
+			show_text_SC("I MIKROPROCESORY", 226, size, length, bg);
+			show_text_SC("PROJEKT:        ", 154, size, length, bg);
 			show_text_MC("WYSWIETLACZ     ", cl5, size, length, bg);
 			show_text_MC("WIDMOWY         ", cl6, size, length, bg);
 		}
