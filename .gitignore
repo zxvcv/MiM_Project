@@ -22,9 +22,9 @@
 *.srec
 
 #User Specific Files
-*.atsuo
+.atsuo
 .cproj
-*.xml
+.xml
 .atsln
 
 
