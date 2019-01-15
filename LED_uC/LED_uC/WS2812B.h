@@ -9,6 +9,7 @@
 #ifndef WS2812B_H_
 #define WS2812B_H_
 
+#include "define.h"
 #include <avr/io.h>
 
 /*

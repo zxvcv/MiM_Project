@@ -7,7 +7,9 @@
  kolory ze strony: https://jonasjacek.github.io/colors/
  */ 
 
-uint8_t COLORS[256][3] = {
+#include "colors.h"
+
+const uint8_t __flash COLORS[256][3] = {
 							//  R    G    B
 							{   0,   0,   0 }, //  0	Black	(system)
 							{ 128,   0,   0 }, //  1	Maroon	(system)
@@ -264,5 +266,5 @@ uint8_t COLORS[256][3] = {
 							{ 208, 208, 208 }, //252	Grey82
 							{ 218, 218, 218 }, //253	Grey85
 							{ 228, 228, 228 }, //254	Grey89
-							{ 238, 238, 238 }, //255	Grey93
-};
+							{ 238, 238, 238 }  //255	Grey93
+					};
