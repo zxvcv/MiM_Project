@@ -35,7 +35,7 @@ int main(void)
 	//const uint8_t cl2[] = { 160,160,160,160,160,160,160,160,160,160,160,160,160,160,160,160 };
 	//const uint8_t cl3[] = { 226,226,226,226,226,226,226,226,226,226,226,226,226,226,226,226 };
 	//const uint8_t cl4[] = { 154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154 };
-	const uint8_t cl5[] = { 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22 };
+	//const uint8_t cl5[] = { 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22 };
 	const uint8_t cl6[] = { 26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26 };
 		
 	WS2812B_reset(20);
@@ -50,12 +50,12 @@ int main(void)
 	{
 		if(PINC&(1<<PC1)) //PC1 nie zwarty do masy
 		{
-			show_text_SC("AVR ATMEGA328P  ", 202, size, length, bg);
-			show_text_SC("MIKROKONTROLERY ", 160, size, length, bg);
+			show_text_SC("AVR ATMEGA328P  ", 160, size, length, bg);
+			show_text_SC("MIKROKONTROLERY ", 226, size, length, bg);
 			show_text_SC("I MIKROPROCESORY", 226, size, length, bg);
-			show_text_SC("PROJEKT:        ", 154, size, length, bg);
-			show_text_MC("WYSWIETLACZ     ", cl5, size, length, bg);
-			show_text_MC("WIDMOWY         ", cl6, size, length, bg);
+			show_text_SC("PROJEKT:        ", 202, size, length, bg);
+			show_text_MC("WYSWIETLACZ     ", cl6, size, length, bg);
+			show_text_MC("         WIDMOWY", cl6, size, length, bg);
 		}
 		else
 			show_picture(0);
